@@ -15,6 +15,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"golang.org/x/crypto/acme/autocert"
@@ -22,12 +23,15 @@ import (
 
 const (
 	htmlIndex = `<html><body>Welcome!</body></html>`
-	httpPort  = "127.0.0.1:8080"
 )
 
 var (
 	flgProduction          = false
 	flgRedirectHTTPToHTTPS = false
+
+	serverDNS = os.Getenv("ACME_SERVER_DNS") // Note: set to your real host
+
+	httpPort = ":80" //= os.Getenv("ACME_SERVER_ADDR") // default is :80
 )
 
 func handleIndex(w http.ResponseWriter, r *http.Request) {
@@ -63,6 +67,7 @@ func makeHTTPToHTTPSRedirectServer() *http.Server {
 }
 
 func parseFlags() {
+	flag.StringVar(&httpPort, "addr", ":80", "HTTP server listening address")
 	flag.BoolVar(&flgProduction, "production", false, "if true, we start HTTPS server")
 	flag.BoolVar(&flgRedirectHTTPToHTTPS, "redirect-to-https", false, "if true, we redirect HTTP to HTTPS")
 	flag.Parse()
@@ -75,12 +80,10 @@ func main() {
 	var httpsSrv *http.Server
 	if flgProduction {
 		hostPolicy := func(ctx context.Context, host string) error {
-			// Note: change to your real host
-			allowedHost := "www.mydomain.com"
-			if host == allowedHost {
+			if host == serverDNS {
 				return nil
 			}
-			return fmt.Errorf("acme/autocert: only %s host is allowed", allowedHost)
+			return fmt.Errorf("acme/autocert: set env var ACME_SERVER_DNS to '%s'", host)
 		}
 
 		dataDir := "."
