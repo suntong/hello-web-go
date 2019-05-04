@@ -38,7 +38,7 @@ func test2(w http.ResponseWriter, r *http.Request) {
 
 func Image(w http.ResponseWriter, r *http.Request) {
 	// Open a JPG file.
-	f, _ := os.Open("vlc-16x16.png")
+	f, _ := os.Open("images/vlc-16x16.png")
 
 	// Read the entire JPG file into memory.
 	reader := bufio.NewReader(f)
