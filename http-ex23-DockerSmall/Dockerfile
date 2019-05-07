@@ -12,4 +12,4 @@ ADD ./images /app/images
 COPY --from=build-env /app/myapp /app
 
 EXPOSE 8080
-ENTRYPOINT ["/app/myapp"]
+ENTRYPOINT cd /app && ./myapp
